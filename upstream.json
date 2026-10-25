@@ -1,0 +1,24 @@
+{
+  "gpt_researcher": {
+    "repository": "https://github.com/assafelovic/gpt-researcher",
+    "version": "0.16.1",
+    "wheel_sha256": "1c0fe74a1c3319b2ac2caa910808c61b638634d2b75361521e8c4627a8b5a8cf"
+  },
+  "mcp": {
+    "repository": "https://github.com/assafelovic/gptr-mcp",
+    "commit": "63884773685b1f12c7f0d9e283b3d71a5b9b5fda",
+    "server_blob": "592dbf699fff7c240644d4ae45d143d60a6badc3",
+    "utils_blob": "057ae8fdf349864c4bc7e81585acb9611e3ef22b",
+    "license_blob": "a469b2e36f12dcc7f724f66cc480d167d23d45f1"
+  },
+  "chatgpt_devkit": {
+    "repository": "https://github.com/openai/sign-in-with-chatgpt-devkit",
+    "commit": "0a36fefeb913055c8c7a1a29b63d82b96b2e841a",
+    "package": "@siwc/local",
+    "version": "0.1.0"
+  },
+  "skill": {
+    "url": "https://github.com/assafelovic/gpt-researcher/blob/main/skills/gpt-researcher/SKILL.md",
+    "blob": "828782a6ffd842634fbffc267c61207009585df0"
+  }
+}
