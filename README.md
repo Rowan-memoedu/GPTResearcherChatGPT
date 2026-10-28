@@ -12,7 +12,7 @@ GPT Researcher 通过本地适配层接入 OpenAI 官方 Sign in with ChatGPT De
 
 已安装上游 `gpt-researcher` Skill，并通过 Codex CLI 注册同名 MCP 服务。Skill 从安装后的下一轮对话加载。MCP 工具有 `quick_search`、`deep_research`、`write_report`、`get_research_sources`、`get_research_context`，另有本地只读工具 `chatgpt_plan_status`。
 
-`deep_research` 收集资料后返回研究 ID；在同一个服务会话中，用这个 ID 调用 `write_report` 生成报告。上游 MCP 的工具名称是 `deep_research`，其内部调用常规研究流程；CLI 的 `--deep` 才选择递归深度研究模式。
+`deep_research` 收集资料后返回研究 ID；用这个 ID 调用 `write_report` 生成报告。研究 ID 和内容保存在本机 SQLite 中，服务空闲退出后仍可恢复。上游 MCP 的工具名称是 `deep_research`，其内部调用常规研究流程；CLI 的 `--deep` 才选择递归深度研究模式。
 
 也可直接使用本地命令：
 
@@ -76,6 +76,10 @@ CLI 默认把报告和来源记录保存到 `D:\Artifacts\GPTResearcher\reports`
 C 盘仅保留 Codex 必需的配置文件和指向 D 盘 Skill 的目录入口；沿用已有 Python、Node.js、PowerShell 安装。
 
 ## 验证与维护
+
+MCP 现通过 `http://127.0.0.1:19782/mcp/gpt-researcher` 共享一份后端，空闲 10 分钟后回收，活动或排队调用受到保护。研究操作串行执行；完成的对象按需从 `D:\AppData\GPTResearcher\mcp-state.sqlite3` 恢复，不在内存中无限累积。状态库上限为 256 MiB，满额时保留既有内容并拒绝新写入，不自动删除成果。`GPTR_MCP_STATE` 仅用于验收时指定隔离状态库。
+
+共享服务的安装、兼容补丁、恢复边界与管理命令见 `D:\Projects\DeveloperGovernance\MCP.md`。共享入口保留原工具名，暂不透传上游资源 URI 和提示模板。
 
 完整 MCP 验收已通过：快速搜索返回 5 条结果，研究读取 3 个 Python 官方文档页面，使用套餐完成 3 次模型调用，生成 797 字符的中文报告。12 项适配和 URL 校验测试通过。中文长查询的独立测试没有检索到来源，保留为当前搜索后端的已知限制。
 

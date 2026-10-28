@@ -21,6 +21,8 @@ data/
 logs/
 reports/
 runtime.json
+*.sqlite3
+*.sqlite3-*
 *.pem
 *.p12
 *.pfx

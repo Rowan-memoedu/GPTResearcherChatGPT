@@ -75,27 +75,47 @@ def mcp_server():
     with contextlib.redirect_stdout(sys.stderr):
         import server
     original = server.GPTResearcher
+    operation_lock = asyncio.Lock()
 
     class QuietResearcher(original):
         async def conduct_research(self, *args, **kwargs):
-            with contextlib.redirect_stdout(sys.stderr):
-                return await super().conduct_research(*args, **kwargs)
+            async with operation_lock:
+                with contextlib.redirect_stdout(sys.stderr):
+                    return await super().conduct_research(*args, **kwargs)
 
         async def write_report(self, *args, **kwargs):
-            with contextlib.redirect_stdout(sys.stderr):
-                return await super().write_report(*args, **kwargs)
+            async with operation_lock:
+                with contextlib.redirect_stdout(sys.stderr):
+                    report = await super().write_report(*args, **kwargs)
+                if hasattr(self, "_mcp_research_id"):
+                    server.mcp.researchers[self._mcp_research_id] = self
+                return report
 
         async def quick_search(self, *args, **kwargs):
-            with contextlib.redirect_stdout(sys.stderr):
-                return await super().quick_search(*args, **kwargs)
+            async with operation_lock:
+                with contextlib.redirect_stdout(sys.stderr):
+                    return await super().quick_search(*args, **kwargs)
 
     server.GPTResearcher = QuietResearcher
+    from mcp_state import DurableResearchers, JsonStore
+    from gpt_researcher.utils.enum import Tone
+    import utils
+
+    def restore_researcher(**kwargs):
+        kwargs["tone"] = Tone(kwargs["tone"])
+        return QuietResearcher(**kwargs)
+
+    state_path = Path(os.getenv("GPTR_MCP_STATE", str(
+        Path(os.getenv("GPTR_DATA", "D:/AppData/GPTResearcher")) / "mcp-state.sqlite3")))
+    server.mcp.researchers = DurableResearchers(state_path, restore_researcher)
+    utils.research_store = server.research_store = JsonStore(state_path, "topics")
 
     @server.mcp.tool()
     async def chatgpt_plan_status() -> dict:
         """Read the local ChatGPT plan connection and completed inference count; never return credentials."""
         from plan_provider import bridge
-        session = await asyncio.to_thread(bridge.call, "status")
+        async with operation_lock:
+            session = await asyncio.to_thread(bridge.call, "status")
         return {"session": session, "billing_route": "official-chatgpt-plan",
                 "completed_model_requests": bridge.completed_requests}
 
