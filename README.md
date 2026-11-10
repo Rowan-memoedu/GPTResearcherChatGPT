@@ -1,5 +1,8 @@
 # GPT Researcher：使用 ChatGPT 套餐额度
 
+协作开发、Agent 提交与合并规则见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+
 GPT Researcher 通过本地适配层接入 OpenAI 官方 Sign in with ChatGPT DevKit，使用授权账号的套餐能力调用公开的 Responses API。授权、权限检查、令牌刷新和响应完成检查由官方 SDK 处理。
 
 不需要配置 OpenAI API Key。当前模型为 `gpt-6.1-sol`，搜索使用 DDGS，正文筛选使用关键词，不调用付费向量接口。
